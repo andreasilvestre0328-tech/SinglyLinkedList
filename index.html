@@ -1,0 +1,709 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Laboratorio Creativo: Listas (Arrays) en JavaScript</title>
+
+    <!--
+      Diseño: minimal y legible.
+      Nota didáctica: evitamos dependencias extra para que sea fácil de compartir.
+    -->
+    <style>
+      :root {
+        --bg: #0b0d12;
+        --panel: #121827;
+        --panel-2: #0f1420;
+        --text: #eaf0ff;
+        --muted: #a8b3cf;
+        --accent: #7c5cff;
+        --accent-2: #2dd4bf;
+        --danger: #ff5c7a;
+        --warning: #fbbf24;
+        --border: rgba(255, 255, 255, 0.10);
+        --shadow: rgba(0, 0, 0, 0.45);
+        --radius: 16px;
+      }
+
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+        background: radial-gradient(1200px 800px at 20% 0%, rgba(124,92,255,0.18), transparent 60%),
+                    radial-gradient(900px 700px at 90% 20%, rgba(45,212,191,0.12), transparent 55%),
+                    var(--bg);
+        color: var(--text);
+      }
+
+      a { color: var(--accent-2); }
+      header {
+        position: sticky;
+        top: 0;
+        z-index: 5;
+        backdrop-filter: blur(10px);
+        background: rgba(11, 13, 18, 0.65);
+        border-bottom: 1px solid var(--border);
+      }
+
+      .wrap {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 18px 16px;
+      }
+
+      .hero {
+        display: grid;
+        gap: 14px;
+        padding: 18px 0 8px;
+      }
+
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        width: fit-content;
+        padding: 6px 10px;
+        border-radius: 999px;
+        background: rgba(124,92,255,0.14);
+        border: 1px solid rgba(124,92,255,0.25);
+        color: var(--text);
+        font-size: 13px;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: 28px;
+        letter-spacing: -0.02em;
+      }
+
+      .sub {
+        margin: 0;
+        color: var(--muted);
+        line-height: 1.5;
+      }
+
+      main {
+        padding: 18px 0 40px;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: 1.15fr 0.85fr;
+        gap: 16px;
+      }
+
+      @media (max-width: 960px) {
+        .grid { grid-template-columns: 1fr; }
+      }
+
+      .card {
+        background: linear-gradient(180deg, rgba(18,24,39,0.96), rgba(15,20,32,0.92));
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        box-shadow: 0 18px 50px var(--shadow);
+        overflow: hidden;
+      }
+
+      .card-hd {
+        padding: 14px 14px 10px;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: start;
+        justify-content: space-between;
+        gap: 10px;
+      }
+
+      .card-hd h2 {
+        margin: 0;
+        font-size: 16px;
+        letter-spacing: -0.01em;
+      }
+
+      .card-hd p {
+        margin: 6px 0 0;
+        font-size: 13px;
+        color: var(--muted);
+        line-height: 1.45;
+      }
+
+      .card-bd { padding: 14px; }
+
+      .row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      }
+      @media (max-width: 560px) {
+        .row { grid-template-columns: 1fr; }
+      }
+
+      label {
+        display: block;
+        font-size: 12px;
+        color: var(--muted);
+        margin-bottom: 6px;
+      }
+
+      input, select, button, textarea {
+        width: 100%;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: rgba(255,255,255,0.04);
+        color: var(--text);
+        padding: 10px 12px;
+        outline: none;
+      }
+
+      textarea { min-height: 88px; resize: vertical; }
+
+      input:focus, select:focus, textarea:focus {
+        border-color: rgba(124,92,255,0.55);
+        box-shadow: 0 0 0 3px rgba(124,92,255,0.12);
+      }
+
+      .btns {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+      }
+      @media (max-width: 560px) {
+        .btns { grid-template-columns: 1fr; }
+      }
+
+      button {
+        cursor: pointer;
+        font-weight: 600;
+        transition: transform .06s ease, background .2s ease, border-color .2s ease;
+      }
+      button:active { transform: translateY(1px); }
+
+      .btn-primary {
+        background: rgba(124,92,255,0.18);
+        border-color: rgba(124,92,255,0.35);
+      }
+      .btn-primary:hover { background: rgba(124,92,255,0.24); }
+
+      .btn-ghost {
+        background: rgba(255,255,255,0.03);
+      }
+      .btn-ghost:hover { background: rgba(255,255,255,0.06); }
+
+      .btn-danger {
+        background: rgba(255,92,122,0.14);
+        border-color: rgba(255,92,122,0.32);
+      }
+      .btn-danger:hover { background: rgba(255,92,122,0.20); }
+
+      .list-visual {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        padding: 12px;
+        border-radius: 14px;
+        border: 1px dashed rgba(255,255,255,0.18);
+        background: rgba(255,255,255,0.03);
+      }
+
+      .chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 12px;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        background: rgba(0,0,0,0.18);
+      }
+
+      .index {
+        font-size: 12px;
+        color: var(--muted);
+        padding: 4px 8px;
+        border-radius: 999px;
+        border: 1px solid rgba(255,255,255,0.12);
+        background: rgba(255,255,255,0.04);
+      }
+
+      .val { font-weight: 700; letter-spacing: 0.2px; }
+
+      .muted { color: var(--muted); }
+
+      .hint {
+        border-left: 3px solid rgba(45,212,191,0.55);
+        padding: 10px 12px;
+        border-radius: 12px;
+        background: rgba(45,212,191,0.07);
+        color: var(--text);
+        font-size: 13px;
+        line-height: 1.45;
+      }
+
+      code {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+        font-size: 12px;
+        color: #dbeafe;
+      }
+
+      .log {
+        display: grid;
+        gap: 10px;
+      }
+
+      .log-item {
+        padding: 10px 12px;
+        border-radius: 14px;
+        border: 1px solid var(--border);
+        background: rgba(255,255,255,0.03);
+      }
+
+      .log-item .t {
+        font-size: 12px;
+        color: var(--muted);
+        margin-bottom: 6px;
+      }
+
+      .log-item .m {
+        margin: 0;
+        line-height: 1.45;
+        font-size: 13px;
+      }
+
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 5px 10px;
+        border-radius: 999px;
+        font-size: 12px;
+        border: 1px solid var(--border);
+        background: rgba(255,255,255,0.03);
+      }
+
+      .pill.warn { border-color: rgba(251,191,36,0.35); background: rgba(251,191,36,0.10); }
+      .pill.ok { border-color: rgba(45,212,191,0.35); background: rgba(45,212,191,0.10); }
+
+      .footer {
+        margin-top: 16px;
+        padding-top: 16px;
+        border-top: 1px solid var(--border);
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.6;
+      }
+    </style>
+  </head>
+
+  <body>
+    <header>
+      <div class="wrap">
+        <div class="hero">
+          <span class="badge">🧠 Laboratorio de Creatividad Digital · Programación con visualización</span>
+          <h1>Listas (Arrays) en JavaScript — Aprende jugando con una “timeline” de assets</h1>
+          <p class="sub">
+            Manipula una lista como si fueran <strong>capas</strong>, <strong>frames</strong> o <strong>recursos</strong> de un proyecto digital.
+            Cada botón ejecuta una operación real y te explica qué cambió.
+          </p>
+        </div>
+      </div>
+    </header>
+
+    <!-- React 18 + Babel para JSX sin build -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <script type="text/babel">
+      /**
+       * App educativa: Arrays en JS con enfoque creativo (assets/timeline).
+       *
+       * Decisiones de diseño (buenas prácticas para clase):
+       * - Estado centralizado para la lista y el historial (más fácil de razonar).
+       * - Acciones pequeñas, explícitas y con mensajes claros (feedback inmediato).
+       * - Validación simple de entradas (evita frustración temprana).
+       * - Se introduce mutación (push/pop/shift/unshift/splice) con aviso pedagógico.
+       */
+
+      const { useMemo, useState } = React;
+
+      function nowTime() {
+        const d = new Date();
+        return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+      }
+
+      /**
+       * Intenta convertir el input en un "asset" útil para clase.
+       * - Si está vacío: regresa null para indicar error.
+       * - Recorta espacios.
+       */
+      function normalizeAsset(raw) {
+        const v = String(raw ?? "").trim();
+        if (!v) return null;
+        return v;
+      }
+
+      /**
+       * Genera un ejemplo "creativo": recursos típicos en un proyecto.
+       */
+      function getStarterAssets() {
+        return [
+          "bg_forest.png",
+          "sprite_hero_idle",
+          "sfx_click.wav",
+          "palette_neon",
+          "frame_001",
+        ];
+      }
+
+      function ArrayLab() {
+        // Lista principal: la “timeline” de assets
+        const [assets, setAssets] = useState(getStarterAssets());
+
+        // Inputs controlados (React best practice)
+        const [assetInput, setAssetInput] = useState("spark_particles");
+        const [spliceIndex, setSpliceIndex] = useState(1);
+        const [spliceDelete, setSpliceDelete] = useState(1);
+
+        // Historial para retroalimentación
+        const [log, setLog] = useState([
+          { time: nowTime(), msg: "Inicio: cargamos una lista de assets para experimentar." }
+        ]);
+
+        // Micro-retos (predicción)
+        const [prediction, setPrediction] = useState("");
+        const [challengeStatus, setChallengeStatus] = useState(null); // "ok" | "warn" | null
+
+        const lengthLabel = useMemo(() => {
+          return `${assets.length} elemento${assets.length === 1 ? "" : "s"}`;
+        }, [assets.length]);
+
+        function addLog(message) {
+          setLog((prev) => [{ time: nowTime(), msg: message }, ...prev].slice(0, 12));
+        }
+
+        /**
+         * Importante didácticamente:
+         * Estos métodos mutan arrays en JS, por eso primero clonamos con [...assets]
+         * para mantener el patrón React (inmutabilidad hacia el state).
+         */
+        function handlePush() {
+          const v = normalizeAsset(assetInput);
+          if (!v) return addLog("⚠️ Escribe un asset válido (no vacío).");
+
+          const next = [...assets];
+          next.push(v);
+
+          setAssets(next);
+          addLog(`push("${v}") → se agregó al final. Nuevo length: ${next.length}.`);
+        }
+
+        function handlePop() {
+          if (assets.length === 0) return addLog("⚠️ pop() no puede: la lista está vacía.");
+
+          const next = [...assets];
+          const removed = next.pop();
+
+          setAssets(next);
+          addLog(`pop() → salió "${removed}" del final. Nuevo length: ${next.length}.`);
+        }
+
+        function handleUnshift() {
+          const v = normalizeAsset(assetInput);
+          if (!v) return addLog("⚠️ Escribe un asset válido (no vacío).");
+
+          const next = [...assets];
+          next.unshift(v);
+
+          setAssets(next);
+          addLog(`unshift("${v}") → se agregó al inicio (índice 0). Nuevo length: ${next.length}.`);
+        }
+
+        function handleShift() {
+          if (assets.length === 0) return addLog("⚠️ shift() no puede: la lista está vacía.");
+
+          const next = [...assets];
+          const removed = next.shift();
+
+          setAssets(next);
+          addLog(`shift() → salió "${removed}" del inicio (índice 0). Nuevo length: ${next.length}.`);
+        }
+
+        /**
+         * splice(index, deleteCount, ...items)
+         * - En creatividad digital se usa como "editar la timeline":
+         *   quitar frames o insertar recursos en una posición exacta.
+         */
+        function handleSpliceInsertReplace() {
+          const v = normalizeAsset(assetInput);
+          if (!v) return addLog("⚠️ Escribe un asset válido (no vacío).");
+
+          const idx = Number(spliceIndex);
+          const del = Number(spliceDelete);
+
+          if (!Number.isInteger(idx) || idx < 0 || idx > assets.length) {
+            return addLog(`⚠️ Índice inválido. Usa 0 a ${assets.length}.`);
+          }
+          if (!Number.isInteger(del) || del < 0) {
+            return addLog("⚠️ deleteCount debe ser 0 o mayor.");
+          }
+
+          const next = [...assets];
+          const removed = next.splice(idx, del, v);
+
+          setAssets(next);
+
+          const removedText = removed.length ? `Quitó: [${removed.join(", ")}]. ` : "No quitó elementos. ";
+          addLog(`splice(${idx}, ${del}, "${v}") → ${removedText}Nuevo length: ${next.length}.`);
+        }
+
+        function handleReset() {
+          setAssets(getStarterAssets());
+          setPrediction("");
+          setChallengeStatus(null);
+          addLog("Reset: volvimos a la lista inicial.");
+        }
+
+        /**
+         * Micro-reto: “Predice el índice 0”
+         * - Se evalúa con algo simple para que el estudiante gane confianza.
+         */
+        function evaluatePrediction() {
+          const pred = String(prediction ?? "").trim();
+          if (!pred) {
+            setChallengeStatus("warn");
+            return addLog("Reto: escribe tu predicción antes de evaluar.");
+          }
+
+          const actual = assets[0] ?? "(vacío)";
+          if (pred === actual) {
+            setChallengeStatus("ok");
+            addLog(`✅ Correcto: el índice 0 es "${actual}".`);
+          } else {
+            setChallengeStatus("warn");
+            addLog(`❌ Aún no: tu predicción fue "${pred}", pero el índice 0 es "${actual}".`);
+          }
+        }
+
+        return (
+          <section className="grid" aria-label="Laboratorio de arrays">
+            <article className="card">
+              <div className="card-hd">
+                <div>
+                  <h2>1) Visualizador de lista</h2>
+                  <p>
+                    Imagina que esta lista es la <strong>timeline</strong> de un proyecto: assets, frames o capas.
+                    Cada tarjeta tiene su <code>índice</code>.
+                  </p>
+                </div>
+                <span className="pill ok">{lengthLabel}</span>
+              </div>
+
+              <div className="card-bd">
+                <div className="hint" style={{ marginBottom: 12 }}>
+                  <strong>Idea clave:</strong> un array es una lista ordenada. Accedes con <code>assets[0]</code>, <code>assets[1]</code>, etc.
+                  <br />
+                  <span className="muted">
+                    En esta práctica usamos métodos que “mutan” arrays (push/pop/shift/unshift/splice),
+                    pero en React siempre clonamos antes para mantener el state consistente.
+                  </span>
+                </div>
+
+                <div className="list-visual" role="list" aria-label="Lista de assets">
+                  {assets.length === 0 ? (
+                    <span className="muted">La lista está vacía. Prueba agregando un elemento.</span>
+                  ) : (
+                    assets.map((item, idx) => (
+                      <span key={`${item}-${idx}`} className="chip" role="listitem">
+                        <span className="index">#{idx}</span>
+                        <span className="val">{item}</span>
+                      </span>
+                    ))
+                  )}
+                </div>
+
+                <div style={{ height: 14 }} />
+
+                <div className="row">
+                  <div>
+                    <label htmlFor="asset">Asset / elemento</label>
+                    <input
+                      id="asset"
+                      type="text"
+                      value={assetInput}
+                      onChange={(e) => setAssetInput(e.target.value)}
+                      placeholder='Ej: "frame_010" o "bg_city.png"'
+                      aria-describedby="asset-help"
+                    />
+                    <div id="asset-help" className="muted" style={{ fontSize: 12, marginTop: 8 }}>
+                      Consejo: usa nombres de recursos reales de tus proyectos (sprites, audio, paletas).
+                    </div>
+                  </div>
+
+                  <div>
+                    <label>Edición tipo “timeline” con splice</label>
+                    <div className="row">
+                      <div>
+                        <label htmlFor="idx">Index</label>
+                        <input
+                          id="idx"
+                          type="number"
+                          value={spliceIndex}
+                          onChange={(e) => setSpliceIndex(e.target.value)}
+                          min="0"
+                        />
+                      </div>
+                      <div>
+                        <label htmlFor="del">Delete</label>
+                        <input
+                          id="del"
+                          type="number"
+                          value={spliceDelete}
+                          onChange={(e) => setSpliceDelete(e.target.value)}
+                          min="0"
+                        />
+                      </div>
+                    </div>
+                    <div className="muted" style={{ fontSize: 12, marginTop: 8 }}>
+                      Inserta o reemplaza en una posición exacta: <code>splice(index, deleteCount, newItem)</code>
+                    </div>
+                  </div>
+                </div>
+
+                <div style={{ height: 14 }} />
+
+                <div className="btns" aria-label="Acciones sobre la lista">
+                  <button className="btn-primary" onClick={handlePush} title="Agrega al final">
+                    push() · Agregar al final
+                  </button>
+                  <button className="btn-ghost" onClick={handlePop} title="Quita del final">
+                    pop() · Quitar del final
+                  </button>
+
+                  <button className="btn-primary" onClick={handleUnshift} title="Agrega al inicio">
+                    unshift() · Agregar al inicio
+                  </button>
+                  <button className="btn-ghost" onClick={handleShift} title="Quita del inicio">
+                    shift() · Quitar del inicio
+                  </button>
+
+                  <button className="btn-primary" onClick={handleSpliceInsertReplace} title="Editar con splice">
+                    splice() · Insertar/Reemplazar
+                  </button>
+                  <button className="btn-danger" onClick={handleReset} title="Reiniciar práctica">
+                    Reset práctica
+                  </button>
+                </div>
+
+                <div style={{ height: 14 }} />
+
+                <div className="hint">
+                  <strong>Mini-guía rápida:</strong>
+                  <ul style={{ margin: "8px 0 0", paddingLeft: 18 }}>
+                    <li><code>push(x)</code> agrega al final</li>
+                    <li><code>pop()</code> quita del final</li>
+                    <li><code>unshift(x)</code> agrega al inicio</li>
+                    <li><code>shift()</code> quita del inicio</li>
+                    <li><code>splice(i, d, x)</code> edita en posición: quita <code>d</code> y pone <code>x</code></li>
+                  </ul>
+                </div>
+              </div>
+            </article>
+
+            <aside className="card">
+              <div className="card-hd">
+                <div>
+                  <h2>2) Retos + Historial</h2>
+                  <p>
+                    Antes de ejecutar, <strong>predice</strong>. Luego verifica. Así entrenas pensamiento algorítmico.
+                  </p>
+                </div>
+                <span className={"pill " + (challengeStatus === "ok" ? "ok" : "warn")}>
+                  {challengeStatus === "ok" ? "Reto: OK" : "Reto"}
+                </span>
+              </div>
+
+              <div className="card-bd">
+                <div className="hint" style={{ marginBottom: 12 }}>
+                  <strong>Reto 1 (rápido):</strong> ¿Cuál es el valor en el índice 0?
+                  <br />
+                  <span className="muted">
+                    Pista: después de <code>unshift()</code> cambia el índice 0.
+                  </span>
+                </div>
+
+                <label htmlFor="pred">Tu predicción para assets[0]</label>
+                <input
+                  id="pred"
+                  type="text"
+                  value={prediction}
+                  onChange={(e) => setPrediction(e.target.value)}
+                  placeholder='Ej: "bg_forest.png"'
+                />
+
+                <div style={{ height: 10 }} />
+
+                <div className="btns">
+                  <button className="btn-primary" onClick={evaluatePrediction}>
+                    Evaluar predicción
+                  </button>
+                  <button
+                    className="btn-ghost"
+                    onClick={() => addLog(`Referencia: assets[0] ahora es "${assets[0] ?? "(vacío)"}".`)}
+                    title="Muestra referencia sin resolver el reto por completo"
+                  >
+                    Ver pista suave
+                  </button>
+                </div>
+
+                <div style={{ height: 14 }} />
+
+                <div className="hint" style={{ marginBottom: 12 }}>
+                  <strong>Reto 2 (en clase):</strong> Deja la lista con exactamente <strong>3 elementos</strong>.
+                  <br />
+                  <span className="muted">
+                    Puedes combinar <code>pop()</code>, <code>shift()</code> o usar <code>splice()</code>.
+                  </span>
+                </div>
+
+                <div className="hint" style={{ marginBottom: 12 }}>
+                  <strong>Reto 3 (creativo):</strong> Convierte la lista en una “secuencia de animación”:
+                  <br />
+                  <span className="muted">
+                    Por ejemplo: <code>frame_001</code>, <code>frame_002</code>, <code>frame_003</code>...
+                    Inserta uno en medio con <code>splice()</code> como si corrigieras un frame.
+                  </span>
+                </div>
+
+                <h3 style={{ margin: "10px 0 8px", fontSize: 14 }}>Historial (lo que hizo tu código)</h3>
+                <div className="log" aria-label="Historial de acciones">
+                  {log.map((item, i) => (
+                    <div key={i} className="log-item">
+                      <div className="t">{item.time}</div>
+                      <p className="m">{item.msg}</p>
+                    </div>
+                  ))}
+                </div>
+
+                <div style={{ height: 14 }} />
+
+                <label>Notas / reflexión (para entregar)</label>
+                <textarea
+                  placeholder="Escribe: ¿Qué operación te pareció más intuitiva? ¿Cuál te confundió y por qué? ¿En qué parte de un proyecto creativo usarías splice?"
+                />
+              </div>
+            </aside>
+          </section>
+        );
+      }
+
+      function App() {
+        return (
+          <React.Fragment>
+            <ArrayLab />
+          </React.Fragment>
+        );
+      }
+
+      const root = ReactDOM.createRoot(document.getElementById("app"));
+      root.render(<App />);
+    </script>
+  </body>
+</html>
