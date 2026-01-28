@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Diario — Lista Simplemente Ligada</title>
+  <meta name="description" content="Simulación de un diario usando lista simplemente ligada (ES6) con Tailwind v4 y Flowbite v4 vía CDN." />
+
+  <!-- Tailwind CSS v4 (CDN) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Flowbite v4 (CSS + JS) vía CDN -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.5.2/flowbite.min.css" rel="stylesheet" />
+</head>
+
+<body class="bg-gray-50 text-gray-900">
+  <!-- Navbar (Flowbite) -->
+  <nav class="border-b bg-white">
+    <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
+      <div class="flex items-center gap-3">
+        <div class="grid h-9 w-9 place-items-center rounded-xl bg-gray-900 text-white font-bold">D</div>
+        <div>
+          <p class="text-sm font-semibold leading-tight">Diario</p>
+          <p class="text-xs text-gray-500 leading-tight">Lista simplemente ligada (ES6)</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <span id="entriesBadge" class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700">
+          Entradas: 0
+        </span>
+
+        <button
+          id="btnSeed"
+          type="button"
+          class="rounded-lg bg-gray-900 px-3 py-2 text-sm font-semibold text-white hover:bg-gray-800 focus:outline-none focus:ring-4 focus:ring-gray-200"
+        >
+          Cargar ejemplo
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main -->
+  <main class="mx-auto max-w-6xl px-4 py-8">
+    <div class="grid gap-6 lg:grid-cols-3">
+      <!-- Panel: Form + Acciones -->
+      <section class="lg:col-span-1">
+        <div class="rounded-2xl border bg-white p-5 shadow-sm">
+          <h1 class="text-lg font-bold">Nueva entrada</h1>
+          <p class="mt-1 text-sm text-gray-600">
+            Inserta entradas al inicio o al final para observar el comportamiento del diario.
+          </p>
+
+          <form id="entryForm" class="mt-5 space-y-4">
+            <div>
+              <label for="title" class="mb-1 block text-sm font-medium text-gray-700">Título</label>
+              <input
+                id="title"
+                name="title"
+                type="text"
+                maxlength="80"
+                placeholder="Ej. 'Un día raro en el servidor'"
+                class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-gray-900 focus:ring-gray-900"
+                required
+              />
+              <p class="mt-1 text-xs text-gray-500">Máx. 80 caracteres.</p>
+            </div>
+
+            <div>
+              <label for="mood" class="mb-1 block text-sm font-medium text-gray-700">Emoción</label>
+              <select
+                id="mood"
+                name="mood"
+                class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-gray-900 focus:ring-gray-900"
+              >
+                <option value="Calma">Calma</option>
+                <option value="Alegría">Alegría</option>
+                <option value="Estrés">Estrés</option>
+                <option value="Curiosidad">Curiosidad</option>
+                <option value="Cansancio">Cansancio</option>
+                <option value="Inspiración">Inspiración</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="content" class="mb-1 block text-sm font-medium text-gray-700">Entrada</label>
+              <textarea
+                id="content"
+                name="content"
+                rows="5"
+                maxlength="600"
+                placeholder="Escribe lo que pasó hoy..."
+                class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-gray-900 focus:ring-gray-900"
+                required
+              ></textarea>
+              <div class="mt-1 flex items-center justify-between text-xs text-gray-500">
+                <span>Máx. 600 caracteres.</span>
+                <span id="charCount">0/600</span>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+              <button
+                id="btnInsertBegin"
+                type="button"
+                class="rounded-lg bg-blue-600 px-3 py-2 text-sm font-semibold text-white hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-200"
+              >
+                Insertar al inicio
+              </button>
+
+              <button
+                id="btnInsertEnd"
+                type="button"
+                class="rounded-lg bg-emerald-600 px-3 py-2 text-sm font-semibold text-white hover:bg-emerald-700 focus:outline-none focus:ring-4 focus:ring-emerald-200"
+              >
+                Insertar al final
+              </button>
+            </div>
+
+            <hr class="my-2">
+
+            <div class="grid grid-cols-2 gap-3">
+              <button
+                id="btnRemoveBegin"
+                type="button"
+                class="rounded-lg bg-amber-500 px-3 py-2 text-sm font-semibold text-white hover:bg-amber-600 focus:outline-none focus:ring-4 focus:ring-amber-200"
+              >
+                Eliminar inicio
+              </button>
+
+              <button
+                id="btnRemoveEnd"
+                type="button"
+                class="rounded-lg bg-rose-600 px-3 py-2 text-sm font-semibold text-white hover:bg-rose-700 focus:outline-none focus:ring-4 focus:ring-rose-200"
+              >
+                Eliminar final
+              </button>
+            </div>
+
+            <button
+              id="btnTraverse"
+              type="button"
+              class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-semibold text-gray-900 hover:bg-gray-50 focus:outline-none focus:ring-4 focus:ring-gray-200"
+            >
+              Recorrer (traverse) y renderizar
+            </button>
+
+            <p class="text-xs text-gray-500">
+              <span class="font-semibold">Idea didáctica:</span>
+              Insertar al inicio simula “evento reciente”, insertar al final simula “evento antiguo”.
+              Eliminar al inicio borra lo más reciente; eliminar al final borra lo más antiguo.
+            </p>
+          </form>
+        </div>
+
+        <!-- Tarjeta de complejidades -->
+        <div class="mt-6 rounded-2xl border bg-white p-5 shadow-sm">
+          <h2 class="text-sm font-bold text-gray-900">Complejidades (Big-O)</h2>
+          <ul class="mt-3 space-y-2 text-sm text-gray-700">
+            <li class="flex items-center justify-between">
+              <span>insertAtBeginning</span>
+              <span class="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-semibold">O(1)</span>
+            </li>
+            <li class="flex items-center justify-between">
+              <span>insertAtEnd</span>
+              <span class="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-semibold">O(n)</span>
+            </li>
+            <li class="flex items-center justify-between">
+              <span>traverse</span>
+              <span class="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-semibold">O(n)</span>
+            </li>
+            <li class="flex items-center justify-between">
+              <span>removeFromBeginning</span>
+              <span class="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-semibold">O(1)</span>
+            </li>
+            <li class="flex items-center justify-between">
+              <span>removeFromEnd</span>
+              <span class="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-semibold">O(n)</span>
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- Panel: Timeline / Lista de entradas -->
+      <section class="lg:col-span-2">
+        <div class="rounded-2xl border bg-white p-5 shadow-sm">
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h2 class="text-lg font-bold">Entradas del diario</h2>
+              <p class="mt-1 text-sm text-gray-600">
+                Render basado en <code class="rounded bg-gray-100 px-1 py-0.5 text-xs">traverse()</code> (head → tail).
+              </p>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <button
+                id="btnClearUI"
+                type="button"
+                class="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-semibold text-gray-900 hover:bg-gray-50 focus:outline-none focus:ring-4 focus:ring-gray-200"
+              >
+                Limpiar UI (no borra lista)
+              </button>
+
+              <button
+                id="btnResetAll"
+                type="button"
+                class="rounded-lg bg-gray-900 px-3 py-2 text-sm font-semibold text-white hover:bg-gray-800 focus:outline-none focus:ring-4 focus:ring-gray-200"
+              >
+                Reiniciar todo
+              </button>
+            </div>
+          </div>
+
+          <div id="emptyState" class="mt-6 rounded-xl border border-dashed p-6 text-center">
+            <p class="text-sm text-gray-600">
+              Aún no hay entradas. Crea una usando el formulario.
+            </p>
+          </div>
+
+          <!-- Lista renderizada -->
+          <div id="entriesContainer" class="mt-6 space-y-4"></div>
+        </div>
+
+        <!-- Panel: log de operaciones -->
+        <div class="mt-6 rounded-2xl border bg-white p-5 shadow-sm">
+          <h3 class="text-sm font-bold text-gray-900">Bitácora de operaciones</h3>
+          <p class="mt-1 text-sm text-gray-600">Útil para explicar qué operación se ejecutó y qué nodo cambió.</p>
+          <div id="opsLog" class="mt-4 max-h-56 space-y-2 overflow-auto rounded-xl bg-gray-50 p-4 text-sm text-gray-700"></div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- Toast (Flowbite) -->
+  <div class="fixed bottom-4 right-4 z-50 space-y-2">
+    <div
+      id="toast"
+      class="hidden w-full max-w-xs items-center rounded-xl border bg-white p-4 text-gray-700 shadow-sm"
+      role="alert"
+    >
+      <div id="toastIcon" class="mr-3 inline-flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-gray-100">
+        <!-- Icon injected -->
+      </div>
+      <div class="text-sm font-medium">
+        <span id="toastMsg">Mensaje</span>
+      </div>
+      <button
+        type="button"
+        class="ml-auto inline-flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-200"
+        data-dismiss-target="#toast"
+        aria-label="Close"
+      >
+        <span class="sr-only">Close</span>
+        <svg class="h-4 w-4" aria-hidden="true" fill="none" viewBox="0 0 14 14">
+          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Flowbite JS -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.5.2/flowbite.min.js"></script>
+
+  <script src="listas_simples.js"></script>
+</body>
+</html>
