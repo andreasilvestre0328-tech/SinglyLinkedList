@@ -1,5 +1,4 @@
 /**
- * Contiene un evento médico y la referencia al siguiente nodo.
  * Nodo de una lista doblemente ligada.
  * Contiene un evento médico y referencias al siguiente y anterior nodo.
  */
